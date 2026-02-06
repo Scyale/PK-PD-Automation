@@ -1,0 +1,48 @@
+model:
+  name: Kapitanov
+  module: models.Kapitanov
+
+simulation:
+  n_doses: 25
+  start_days: 0.0
+  solver:
+    method: Radau
+    rtol: 1.0e-6
+    atol: 1.0e-9
+  dt_days: 0.1
+  save_last_interval_only: true
+
+params:
+  V1: 2.29
+  V2: 12.4
+  V3: 0.563
+
+  t_half: 32.8
+  td_12: 2.3291666666666666
+  td_13: 1.25
+  P12: 0.352
+  P13: 0.3
+
+  CR_1: 0.00605
+  CR_2: 0.127
+  CR_3: 2.02
+
+  kdeg: 24.0
+
+  kon: 86.4
+  koff: 2.8512
+
+  MW: 146899.0
+  body_weight_kg: 70.0
+
+output:
+  root_dir: results/Kapitanov_sweep
+  format: h5
+  folder_template: "{dose_mgkg}mgkg_q{interval_weeks}w"
+  write_run_h5: true
+  write_config_json: true
+  write_summary_json: true
+
+sweep:
+  dose_mgkg_values: [1.0]
+  interval_weeks_values: [2]

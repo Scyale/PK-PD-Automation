@@ -1,0 +1,41 @@
+model:
+  name: Walz
+  module: models.Walz
+
+simulation:
+  n_doses: 25
+  start_days: 0.0
+  dt_days: 0.1
+  solver:
+    method: Radau
+    rtol: 1e-6
+    atol: 1e-9
+
+# Model params override DEFAULTS here if you want.
+# Keep values aligned with your corrected Walz.txt
+params:
+  body_weight_kg: 70.0
+  ka: 0.26
+  F: 0.63
+  Vc_ml: 2790.0
+  Cl_ml_day: 117.0
+  Q_ml_day: 263.0
+  Vp_ml: 1656.0
+  Vmax_ugml_day: 1.39
+  Km_ugml: 2.41
+  TARC0: 1.0
+  kout: 0.26
+  Imax: 0.8
+  IC50_ugml: 6.05
+
+# This is the key to making the runner model-agnostic:
+outputs:
+  pk_key: Central_ugml
+  pd_key: TARC_red
+
+output:
+  root_dir: results/Walz_sweep
+  folder_template: "{dose_mgkg}mgkg_q{interval_weeks}w"
+  write_run_h5: true
+  write_config_json: true
+  write_summary_json: true
