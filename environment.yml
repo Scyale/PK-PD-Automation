@@ -1,0 +1,30 @@
+name: ode-sim
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+
+  # Core scientific + ODE
+  - numpy=1.26.*
+  - scipy=1.11.*
+  - matplotlib=3.8.*
+
+  # Data + configs + outputs
+  - pandas=2.1.*
+  - pyyaml=6.*
+  - h5py=3.9.*
+
+  # Testing / dev
+  - pytest=7.4.*
+
+  # Jupyter
+  - jupyterlab=4.*
+  - ipykernel
+  - nbformat
+  - ipywidgets
+  - tqdm
+
+  # Optional quality-of-life
+  - black
+  - pre-commit
+  - pip
