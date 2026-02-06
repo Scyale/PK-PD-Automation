@@ -1,0 +1,16 @@
+{
+  "name": "PK-PD-Automation",
+  "image": "mcr.microsoft.com/devcontainers/miniconda:3",
+  "postCreateCommand": "conda env create -f environment.yml || conda env update -f environment.yml",
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "python.defaultInterpreterPath": "/opt/conda/envs/ode-sim/bin/python"
+      },
+      "extensions": [
+        "ms-python.python",
+        "ms-toolsai.jupyter"
+      ]
+    }
+  }
+}
