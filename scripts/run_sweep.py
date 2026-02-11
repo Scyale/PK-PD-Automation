@@ -26,6 +26,59 @@ import yaml
 import h5py
 from scipy.integrate import solve_ivp
 
+import hashlib
+import json as _json
+from datetime import datetime
+
+import pandas as pd
+from concurrent.futures import ProcessPoolExecutor, as_completed
+
+def _canonicalize_params(obj):
+    """JSON-stable, deterministic representation for hashing."""
+    if isinstance(obj, dict):
+        return {k: _canonicalize_params(obj[k]) for k in sorted(obj)}
+    if isinstance(obj, (list, tuple)):
+        return [_canonicalize_params(x) for x in obj]
+    # normalize numpy scalars
+    if hasattr(obj, "item") and callable(obj.item):
+        try:
+            return obj.item()
+        except Exception:
+            pass
+    if isinstance(obj, float):
+        # normalize float representation to avoid tiny roundoff changing the hash
+        return float(f"{obj:.12g}")
+    return obj
+
+def _params_fingerprint(params: dict) -> str:
+    payload = _json.dumps(_canonicalize_params(params), sort_keys=True, separators=(",", ":"))
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:12]
+
+def _effective_params(cfg: dict, model_module, param_overrides: dict | None) -> dict:
+    p = dict(getattr(model_module, "DEFAULTS", {}))
+    p.update(cfg.get("params", {}))
+    if param_overrides:
+        p.update(param_overrides)
+    return p
+
+def _param_root_dir(cfg: dict, model_module, param_overrides: dict | None) -> Path:
+    base_root = _resolve_under_repo(cfg["output"]["root_dir"])
+    eff = _effective_params(cfg, model_module, param_overrides)
+    pid = _params_fingerprint(eff)
+    return base_root / f"params_{pid}"
+
+def _write_param_manifest(param_root: Path, cfg: dict, eff_params: dict, param_overrides: dict | None):
+    param_root.mkdir(parents=True, exist_ok=True)
+    manifest_path = param_root / "param_set.json"
+    if manifest_path.exists():
+        return
+    manifest = {
+        "model": cfg.get("model", {}),
+        "param_overrides": param_overrides or {},
+        "effective_params": eff_params,
+        "created_at": datetime.now().isoformat(timespec="seconds"),
+    }
+    manifest_path.write_text(json.dumps(manifest, indent=2), encoding="utf-8")
 
 def _repo_root() -> Path:
     """Repo root = folder containing configs/, scripts/, models/, notebooks/."""
@@ -37,11 +90,8 @@ def _resolve_under_repo(p: str | Path) -> Path:
     return p if p.is_absolute() else (_repo_root() / p)
 
 def _run_one_worker(args):
-    """
-    Picklable worker for Windows multiprocessing.
-    args = (cfg, dose, interval, out_root, folder_template, overwrite)
-    """
-    cfg, dose, interval, out_root, folder_template, overwrite = args
+    # args = (cfg, dose, interval, out_root, folder_template, overwrite, param_overrides)
+    cfg, dose, interval, out_root, folder_template, overwrite, param_overrides = args
 
     folder = folder_template.format(dose_mgkg=dose, interval_weeks=interval)
     out_dir = out_root / folder
@@ -51,8 +101,7 @@ def _run_one_worker(args):
         with open(summary_path, "r", encoding="utf-8") as f:
             return json.load(f)
 
-    return run_one(cfg, dose, interval, out_dir)
-
+    return run_one(cfg, dose, interval, out_dir, param_overrides=param_overrides)
 
 def load_config(path: str | Path) -> Dict[str, Any]:
     with open(path, "r", encoding="utf-8") as f:
@@ -70,12 +119,20 @@ def make_last_interval_grid(t_start: float, t_end: float, dt: float) -> np.ndarr
     else:
         t[-1] = t_end
     return t
-
     
-def run_one(config: Dict[str, Any], dose_mgkg: float, interval_weeks: int, out_dir: Path) -> Dict[str, Any]:
+def run_one(
+    config: Dict[str, Any],
+    dose_mgkg: float,
+    interval_weeks: int,
+    out_dir: Path,
+    param_overrides: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
     model_module = importlib.import_module(config["model"]["module"])
+
     params = dict(model_module.DEFAULTS)
     params.update(config.get("params", {}))
+    if param_overrides:
+        params.update(param_overrides)
     model_module.validate_params(params)
 
     sim = config["simulation"]
@@ -93,7 +150,6 @@ def run_one(config: Dict[str, Any], dose_mgkg: float, interval_weeks: int, out_d
 
     y = model_module.initial_conditions(params)
 
-    # Required model hook
     if not hasattr(model_module, "apply_dose"):
         raise AttributeError(
             f"Model {config['model']['module']} must define apply_dose(y, dose_mgkg, params)."
@@ -129,14 +185,11 @@ def run_one(config: Dict[str, Any], dose_mgkg: float, interval_weeks: int, out_d
         if not sol.success:
             raise RuntimeError(f"Solver failed on interval {k+1}/{n_doses}: {sol.message}")
 
-        # state at end of interval
         y = sol.y[:, -1]
 
-        # store last-interval trajectory only
         if is_last:
             t_last, y_last = sol.t, sol.y
 
-    # After all intervals: compute derived on last interval
     if t_last is None or y_last is None:
         raise RuntimeError("Last interval trajectory was not captured (unexpected).")
 
@@ -169,7 +222,6 @@ def run_one(config: Dict[str, Any], dose_mgkg: float, interval_weeks: int, out_d
 
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    # Write H5 (last interval only)
     if config["output"].get("write_run_h5", True):
         with h5py.File(out_dir / "run.h5", "w") as f:
             f.create_dataset("t_days", data=t_last)
@@ -204,6 +256,7 @@ def run_one(config: Dict[str, Any], dose_mgkg: float, interval_weeks: int, out_d
             "params": params,
             "outputs": outputs,
             "run_params": {"dose_mgkg": float(dose_mgkg), "interval_weeks": int(interval_weeks)},
+            "param_overrides": param_overrides or {},
         }
         (out_dir / "run_config.json").write_text(json.dumps(cfg_out, indent=2), encoding="utf-8")
 
@@ -212,34 +265,30 @@ def run_one(config: Dict[str, Any], dose_mgkg: float, interval_weeks: int, out_d
 
     return summary
 
-
-
-import pandas as pd
-from concurrent.futures import ProcessPoolExecutor, as_completed
-
 def run_sweep(
     config_path,
     dose_values,
     interval_values,
     workers=1,
     overwrite=False,
+    param_overrides: Dict[str, Any] | None = None,
 ):
-    """
-    Run a full sweep over dose_mgkg x interval_weeks.
-    """
     cfg = load_config(_resolve_under_repo(config_path))
+    model_module = importlib.import_module(cfg["model"]["module"])
 
-    # Resolve output root robustly (relative paths become repo-root relative)
-    out_root = _resolve_under_repo(cfg["output"]["root_dir"])
+    eff_params = _effective_params(cfg, model_module, param_overrides)
+
+    # param-specific root folder (based ONLY on eff_params)
+    out_root = _param_root_dir(cfg, model_module, param_overrides)
     out_root.mkdir(parents=True, exist_ok=True)
+    _write_param_manifest(out_root, cfg, eff_params, param_overrides)
 
     folder_template = cfg["output"]["folder_template"]
 
     combos = [(float(d), int(i)) for d in dose_values for i in interval_values]
-    tasks = [(cfg, d, i, out_root, folder_template, overwrite) for d, i in combos]
+    tasks = [(cfg, d, i, out_root, folder_template, overwrite, param_overrides) for d, i in combos]
 
     results = []
-
     if workers > 1:
         with ProcessPoolExecutor(max_workers=workers) as ex:
             futures = [ex.submit(_run_one_worker, t) for t in tasks]
@@ -251,15 +300,24 @@ def run_sweep(
 
     return pd.DataFrame(results)
 
-
-
-def run_reference(config_path: str | Path, dose_mgkg: float = 1.0, interval_weeks: int = 2) -> Dict[str, Any]:
+def run_reference(
+    config_path: str | Path,
+    dose_mgkg: float = 1.0,
+    interval_weeks: int = 2,
+    param_overrides: Dict[str, Any] | None = None,
+) -> Dict[str, Any]:
     cfg = load_config(_resolve_under_repo(config_path))
-    out_root = _resolve_under_repo(cfg["output"]["root_dir"])
+    model_module = importlib.import_module(cfg["model"]["module"])
+
+    eff_params = _effective_params(cfg, model_module, param_overrides)
+
+    out_root = _param_root_dir(cfg, model_module, param_overrides)
+    out_root.mkdir(parents=True, exist_ok=True)
+    _write_param_manifest(out_root, cfg, eff_params, param_overrides)
+
     folder = format_run_folder(cfg["output"]["folder_template"], dose_mgkg, interval_weeks)
     out_dir = out_root / folder
-    return run_one(cfg, dose_mgkg, interval_weeks, out_dir)
-
+    return run_one(cfg, dose_mgkg, interval_weeks, out_dir, param_overrides=param_overrides)
 
 if __name__ == "__main__":
     import argparse
