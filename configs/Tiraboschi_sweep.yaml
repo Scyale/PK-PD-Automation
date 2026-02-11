@@ -1,0 +1,44 @@
+model:
+  name: Tiraboschi
+  module: models.Tiraboschi
+
+simulation:
+  n_doses: 25
+  start_days: 0.0
+  dt_days: 0.1
+  solver:
+    method: Radau
+    rtol: 1e-6
+    atol: 1e-9
+
+params:
+  # ---- PK ----
+  body_weight_kg: 70.0
+
+  ka: 0.23                # 1/day
+  F: 0.89                 # bioavailability
+
+  Vc_ml: 3460.0           # ml
+  Cl_ml_day: 145.0        # ml/day
+  Q_ml_day: 569.0         # ml/day
+  Vp_ml: 2480.0           # ml
+
+  Vmax_ug_day: 36.2      # ug/day
+  Km_ugml: 0.07           # ug/ml
+
+  # ---- PD ----
+  EASI0: 27.5
+  Imax: 0.97
+  IC50_ugml: 0.01         # ug/ml
+  kout: 0.0224            # 1/day
+
+outputs:
+  pk_key: Central_ugml
+  pd_key: EASI_red
+
+output:
+  root_dir: results/Tiraboschi_sweep
+  folder_template: "{dose_mgkg}mgkg_q{interval_weeks}w"
+  write_run_h5: true
+  write_run_config_json: true
+  write_summary_json: true
