@@ -1,0 +1,12 @@
+numpy==1.26.*
+scipy==1.11.*
+matplotlib==3.8.*
+pandas==2.1.*
+PyYAML==6.*
+h5py==3.9.*
+pytest==7.4.*
+jupyterlab==4.*
+ipykernel
+nbformat
+ipywidgets
+tqdm

@@ -12,6 +12,8 @@ This repository provides an automated Python workflow to run PK/PD models, adjus
 
 ## Quickstart (local)
 
+### Option A: conda
+
 1. Create the conda environment:
    ```bash
    conda env create -f environment.yml
@@ -25,6 +27,18 @@ This repository provides an automated Python workflow to run PK/PD models, adjus
    ```bash
    jupyter lab
    ```
+
+### Option B: pip + venv
+
+If conda is unavailable, you can use pip:
+
+```bash
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+```
+
+Then run the same commands shown above.
 
 ## Quickstart (GitHub Codespaces)
 

@@ -91,9 +91,25 @@ def _effective_params(cfg: dict, model_module, param_overrides: Optional[dict]) 
 def _base_results_root(cfg: dict, kind: str) -> Path:
     """
     kind: "sweep" or "timecourse"
-    Returns: <repo>/results/<ModelName>_<kind>
+
+    Prefer output.root_dir from config for backward compatibility. If the configured
+    path looks sweep-specific, derive a matching timecourse root by swapping the
+    suffix. Fallback remains: <repo>/results/<ModelName>_<kind>.
     """
     model_name = cfg["model"]["name"]
+    configured = cfg.get("output", {}).get("root_dir")
+
+    if configured:
+        configured_path = _resolve_under_repo(configured)
+        if kind == "sweep":
+            return configured_path
+
+        # timecourse root derived from configured sweep root where possible
+        name = configured_path.name
+        if name.endswith("_sweep"):
+            return configured_path.with_name(name[:-6] + "_timecourse")
+        return configured_path.with_name(f"{name}_{kind}")
+
     return _repo_root() / "results" / f"{model_name}_{kind}"
 
 def _param_root_dir(cfg: dict, model_module, param_overrides: Optional[dict], kind: str) -> Path:
