@@ -6,7 +6,7 @@ This repository provides an automated Python workflow to run PK/PD models, adjus
 
 - `configs/`: Model + solver configuration YAMLs (e.g., `Walz_sweep.yaml`, `Kapitanov_sweep.yaml`).
 - `models/`: PK/PD model implementations with a common interface (`DEFAULTS`, `validate_params`, `initial_conditions`, `rhs`, `derived`, `apply_dose`).
-- `scripts/run_sweep.py`: Main runner used by both scripts and notebooks.
+- `scripts/runner.py`: Main runner used by both scripts and notebooks.
 - `notebooks/`: Interactive workflows for running sweeps and validating references.
 - `results/`: Output root for generated runs (created on first run). The exact subfolder names are controlled by each config's `output.root_dir` and `output.folder_template`.
 
@@ -19,7 +19,7 @@ This repository provides an automated Python workflow to run PK/PD models, adjus
    ```
 2. Run a reference simulation:
    ```bash
-   python scripts/run_sweep.py --config configs/Kapitanov_sweep.yaml --dose_mgkg 1.0 --interval_weeks 2
+   python scripts/runner.py --config configs/Kapitanov_sweep.yaml --dose_mgkg 1.0 --interval_weeks 2
    ```
 3. Open notebooks (optional):
    ```bash
@@ -40,10 +40,11 @@ This repository includes a devcontainer configuration to set up a Codespace with
 
 ### Where outputs are stored
 
-All outputs are written under the `results/` directory at the repo root. Each configuration sets the output root and folder template:
+All outputs are written under the `results/` directory at the repo root using the pattern
+`results/<ModelName>_<kind>/params_<hash>/<dose_mgkg>mgkg_q<interval_weeks>w/`.
 
-- `configs/Walz_sweep.yaml` writes under `results/Walz_sweep/{dose_mgkg}mgkg_q{interval_weeks}w/`.
-- `configs/Kapitanov_sweep.yaml` writes under `results/Kapitanov_sweep/{dose_mgkg}mgkg_q{interval_weeks}w/`.
+- `kind` is `sweep` for reference/sweep runs and `timecourse` for full-trajectory runs.
+- The parameter hash is computed from effective model parameters to keep different parameterizations separated.
 
 Each run folder includes:
 - `run.h5` (HDF5 data),
