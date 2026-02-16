@@ -40,5 +40,5 @@ output:
   root_dir: results/Tiraboschi_sweep
   folder_template: "{dose_mgkg}mgkg_q{interval_weeks}w"
   write_run_h5: true
-  write_run_config_json: true
+  write_config_json: true
   write_summary_json: true
