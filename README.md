@@ -1,8 +1,7 @@
 # PK/PD Workflow Automation
 
-!\[Python](https://img.shields.io/badge/python-3.10%2B-blue)
-!\[Status](https://img.shields.io/badge/status-active-success)
-!\[License](https://img.shields.io/badge/license-MIT-lightgrey)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
 A lightweight Python workflow to run repeated-dose PK/PD ODE models,
 perform dose/interval sweeps, and visualize exposure-response or full
