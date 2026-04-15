@@ -7,8 +7,6 @@ A lightweight Python workflow to run repeated-dose PK/PD ODE models,
 perform dose/interval sweeps, and visualize exposure-response or full
 timecourses.
 
-\---
-
 ## Quick start (2 minutes)
 
 ``` bash
@@ -31,38 +29,30 @@ Run a test simulation:
 python scripts/runner.py --config configs/Dupi\_sweep.yaml --dose\_mgkg 5 --interval\_weeks 4
 ```
 
-\---
-
 ## Core idea
 
 The workflow separates:
 
-* **Models** → biology + ODEs (`models/\*.py`)
-* **Configs** → parameters + solver (`configs/\*.yaml`)
+* **Models** → biology + ODEs (`models/<NAME>.py`)
+* **Configs** → parameters + solver (`configs/<NAME>.yaml`)
 * **Runner** → execution + storage (`scripts/runner.py`)
 
 Everything flows through the runner.
 
-\---
-
 ## Repository structure
 
+```
 PK-PD-Automation/
-
-&#x20;  ├ configs/     # YAML configs per model
+   ├ configs/     # YAML configs per model
    ├ models/      # PK/PD model implementations
    ├ scripts/     # runner.py (core engine)
    ├ notebooks/   # Sweep, Timecourse, Helper workflows
    └ results/     # auto-generated outputs
-
-
-\---
+```
 
 ## Notebooks
 
 Each notebook contains markdown cells and documentation. This is just to provide an overview of the basic possibilities.
-
-
 
 ### Sweep.ipynb
 
@@ -81,12 +71,6 @@ Each notebook contains markdown cells and documentation. This is just to provide
 * Inspect existing result folders
 * Track parameter sets
 * Clean up outdated runs
-
-
-
-
-
-\---
 
 ## How it works
 
@@ -107,22 +91,19 @@ Defines: - model module - parameters - solver settings - output keys
 * runs simulation
 * saves outputs
 
-\---
-
 ## Results structure
+```
+results/<br>
+├─ sweep/<br>
+│   └─ params/<br>
+│      └─ 5mgkg_q4w/<br>
+└─ timecourse/<br>
+   └─ params/<br>
+      └─ 5mgkg_q4w_n25/<br>
+```
 
-&#x20;   results/
-     ├─ <Model>\_sweep/
-     │   └─ params\_<hash>/
-     │       └─ 5mgkg\_q4w/
-     └─ <Model>\_timecourse/
-         └─ params\_<hash>/
-             └─ 5mgkg\_q4w\_n25/
+Each run contains: - `run.h5` - `run_config.json` - `run_summary.json`
 
-
-Each run contains: - `run.h5` - `run\_config.json` - `run\_summary.json`
-
-\---
 
 ## Add a new model
 
@@ -130,38 +111,20 @@ Each run contains: - `run.h5` - `run\_config.json` - `run\_summary.json`
 2. Implement required API:
 
    * DEFAULTS
-   * validate\_params
-   * initial\_conditions
-   * apply\_dose
+   * validate_params
+   * initial_conditions
+   * apply_dose
    * rhs
    * derived
-3. Add config `configs/<NewModel>\_sweep.yaml`
+3. Add config `configs/<NewModel>_sweep.yaml`
 4. Register in notebooks
 5. Run a test simulation
-
-\---
-
-## Example
-
-``` python
-from scripts.runner import run\_sweep
-
-df = run\_sweep(
-    config\_path="configs/Dupi\_sweep.yaml",
-    dose\_values=\[1,2,5],
-    interval\_values=\[4,8,16],
-)
-```
-
-\---
 
 ## Notes
 
 * Results are cached by parameter hash
 * YAML controls PK/PD outputs
 * Timecourse and sweep outputs are separated
-
-\---
 
 ## Tip
 
