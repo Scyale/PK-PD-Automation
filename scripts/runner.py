@@ -286,7 +286,9 @@ def run_one(
     summary: Dict[str, Any] = {
         "C_trough_ugml": C_trough,
         "C_avg_ugml": C_avg,
+        # Keep both spellings for backward compatibility with prior notebooks.
         "C_max_ugml": C_max,
+        "Cmax_ugml": C_max,
         "t_end_days": float(t_end),
         "dose_mgkg": float(dose_mgkg),
         "interval_weeks": int(interval_weeks),
@@ -303,6 +305,7 @@ def run_one(
 
         if pk_key in derived_full:
             Central_full = np.asarray(derived_full[pk_key], dtype=float)
+            # Mirror legacy naming above while making explicit this metric is full-trajectory.
             summary["Cmax_ugml"] = float(np.max(Central_full))
             summary["AUC_ugml_day"] = float(np.trapz(Central_full, t_full))
 

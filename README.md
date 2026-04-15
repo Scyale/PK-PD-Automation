@@ -26,7 +26,7 @@ pip install -r requirements.txt
 Run a test simulation:
 
 ``` bash
-python scripts/runner.py --config configs/Dupi\_sweep.yaml --dose\_mgkg 5 --interval\_weeks 4
+python scripts/runner.py --config configs/Dupi_sweep.yaml --dose_mgkg 5 --interval_weeks 4
 ```
 
 ## Core idea
@@ -93,13 +93,13 @@ Defines: - model module - parameters - solver settings - output keys
 
 ## Results structure
 ```
-results/<br>
-├─ sweep/<br>
-│   └─ params/<br>
-│      └─ 5mgkg_q4w/<br>
-└─ timecourse/<br>
-   └─ params/<br>
-      └─ 5mgkg_q4w_n25/<br>
+results/
+├─ <ModelName>_sweep/
+│  └─ params_<hash>/
+│     └─ 5mgkg_q4w/
+└─ <ModelName>_timecourse/
+   └─ params_<hash>/
+      └─ 5mgkg_q4w_n25/
 ```
 
 Each run contains: - `run.h5` - `run_config.json` - `run_summary.json`
@@ -130,4 +130,3 @@ Each run contains: - `run.h5` - `run_config.json` - `run_summary.json`
 
 If something breaks, it's almost always: - wrong `pk\_key` / `pd\_key` -
 mismatch between model `derived()` and YAML - or stale cached results
-

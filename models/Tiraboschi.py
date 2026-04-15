@@ -92,11 +92,10 @@ def apply_dose(y: np.ndarray, dose_mgkg: float, params: Dict[str, Any]) -> np.nd
 # - AUC, AUCss are accumulators (AUC integrates Central concentration over time)
 # -----------------------------------------------------------------------------
 def rhs(t: float, y: np.ndarray, p: Dict[str, Any]) -> np.ndarray:
-    Dep, Cent, Peri, EASI, AUC, AUCss = y
+    Dep, Cent, Peri, EASI, _AUC, _AUCss = y
 
     # PK params
     ka = float(p["ka"])
-    F = float(p["F"])
     Vc = float(p["Vc_ml"])
     Vp = float(p["Vp_ml"])
     Cl = float(p["Cl_ml_day"])   # mL/day
