@@ -1,75 +1,171 @@
-# PK-PD-Automation
+# PK/PD Workflow Automation
 
-This repository provides an automated Python workflow to run PK/PD models, adjust configurations, and generate parameter plots. It includes a reusable sweep runner, two example models (Walz and Kapitanov), and notebooks that demonstrate end-to-end usage.
+!\[Python](https://img.shields.io/badge/python-3.10%2B-blue)
+!\[Status](https://img.shields.io/badge/status-active-success)
+!\[License](https://img.shields.io/badge/license-MIT-lightgrey)
 
-## Repository layout
+A lightweight Python workflow to run repeated-dose PK/PD ODE models,
+perform dose/interval sweeps, and visualize exposure-response or full
+timecourses.
 
-- `configs/`: Model + solver configuration YAMLs (e.g., `Walz_sweep.yaml`, `Kapitanov_sweep.yaml`).
-- `models/`: PK/PD model implementations with a common interface (`DEFAULTS`, `validate_params`, `initial_conditions`, `rhs`, `derived`, `apply_dose`).
-- `scripts/runner.py`: Main runner used by both scripts and notebooks.
-- `notebooks/`: Interactive workflows for running sweeps and validating references.
-- `results/`: Output root for generated runs (created on first run). The exact subfolder names are controlled by each config's `output.root_dir` and `output.folder_template`.
+\---
 
-## Quickstart (local)
+## Quick start (2 minutes)
 
-### Option A: conda
+``` bash
+conda env create -f environment.yml
+conda activate ode-sim
+jupyter lab
+```
 
-1. Create the conda environment:
-   ```bash
-   conda env create -f environment.yml
-   conda activate ode-sim
-   ```
-2. Run a reference simulation:
-   ```bash
-   python scripts/runner.py --config configs/Kapitanov_sweep.yaml --dose_mgkg 1.0 --interval_weeks 2
-   ```
-3. Open notebooks (optional):
-   ```bash
-   jupyter lab
-   ```
+Or:
 
-### Option B: pip + venv
-
-If conda is unavailable, you can use pip:
-
-```bash
+``` bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-Then run the same commands shown above.
+Run a test simulation:
 
-## Quickstart (GitHub Codespaces)
+``` bash
+python scripts/runner.py --config configs/Dupi\_sweep.yaml --dose\_mgkg 5 --interval\_weeks 4
+```
 
-This repository includes a devcontainer configuration to set up a Codespace with the required conda environment.
+\---
 
-1. Open the repo on GitHub and click **Code → Codespaces → Create codespace**.
-2. On first start, the Codespace will create the `ode-sim` conda environment from `environment.yml`.
-3. Activate the environment in your terminal (if not already active):
-   ```bash
-   conda activate ode-sim
-   ```
-4. Run scripts or notebooks as in the local quickstart.
+## Core idea
 
-### Where outputs are stored
+The workflow separates:
 
-All outputs are written under the `results/` directory at the repo root using the pattern
-`results/<ModelName>_<kind>/params_<hash>/<dose_mgkg>mgkg_q<interval_weeks>w/`.
+* **Models** → biology + ODEs (`models/\*.py`)
+* **Configs** → parameters + solver (`configs/\*.yaml`)
+* **Runner** → execution + storage (`scripts/runner.py`)
 
-- `kind` is `sweep` for reference/sweep runs and `timecourse` for full-trajectory runs.
-- The parameter hash is computed from effective model parameters to keep different parameterizations separated.
+Everything flows through the runner.
 
-Each run folder includes:
-- `run.h5` (HDF5 data),
-- `run_config.json` (resolved configuration),
-- `run_summary.json` (summary metrics).
+\---
 
-## Configuration notes
+## Repository structure
 
-The YAML config controls:
-- `model.module`: Python import path for the model (e.g., `models.Walz`).
-- `simulation.solver`: `solve_ivp` method and tolerances.
-- `outputs.pk_key` / `outputs.pd_key`: Keys used when computing summary metrics.
+PK-PD-Automation/
 
-See `configs/*.yaml` for examples.
+&#x20;  ├ configs/     # YAML configs per model
+   ├ models/      # PK/PD model implementations
+   ├ scripts/     # runner.py (core engine)
+   ├ notebooks/   # Sweep, Timecourse, Helper workflows
+   └ results/     # auto-generated outputs
+
+
+\---
+
+## Notebooks
+
+Each notebook contains markdown cells and documentation. This is just to provide an overview of the basic possibilities.
+
+
+
+### Sweep.ipynb
+
+* Run dose × interval grids
+* Generate exposure-response plots
+* Compare regimens (q4w, q8w, etc.)
+
+### Timecourse.ipynb
+
+* Simulate full PK/PD trajectories
+* Plot PK and optional PD over time
+* Supports steady-state and single-dose
+
+### Helper.ipynb
+
+* Inspect existing result folders
+* Track parameter sets
+* Clean up outdated runs
+
+
+
+
+
+\---
+
+## How it works
+
+### 1\. Model (`models/<Model>.py`)
+
+Defines: - ODE system (`rhs`) - dosing (`apply\_dose`) - derived outputs
+(PK/PD metrics)
+
+### 2\. Config (`configs/<Model>\_sweep.yaml`)
+
+Defines: - model module - parameters - solver settings - output keys
+
+### 3\. Runner (`scripts/runner.py`)
+
+* loads config + model
+* builds parameter set
+* computes hash
+* runs simulation
+* saves outputs
+
+\---
+
+## Results structure
+
+&#x20;   results/
+     ├─ <Model>\_sweep/
+     │   └─ params\_<hash>/
+     │       └─ 5mgkg\_q4w/
+     └─ <Model>\_timecourse/
+         └─ params\_<hash>/
+             └─ 5mgkg\_q4w\_n25/
+
+
+Each run contains: - `run.h5` - `run\_config.json` - `run\_summary.json`
+
+\---
+
+## Add a new model
+
+1. Create `models/<NewModel>.py`
+2. Implement required API:
+
+   * DEFAULTS
+   * validate\_params
+   * initial\_conditions
+   * apply\_dose
+   * rhs
+   * derived
+3. Add config `configs/<NewModel>\_sweep.yaml`
+4. Register in notebooks
+5. Run a test simulation
+
+\---
+
+## Example
+
+``` python
+from scripts.runner import run\_sweep
+
+df = run\_sweep(
+    config\_path="configs/Dupi\_sweep.yaml",
+    dose\_values=\[1,2,5],
+    interval\_values=\[4,8,16],
+)
+```
+
+\---
+
+## Notes
+
+* Results are cached by parameter hash
+* YAML controls PK/PD outputs
+* Timecourse and sweep outputs are separated
+
+\---
+
+## Tip
+
+If something breaks, it's almost always: - wrong `pk\_key` / `pd\_key` -
+mismatch between model `derived()` and YAML - or stale cached results
+
