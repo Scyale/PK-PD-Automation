@@ -139,7 +139,8 @@ def derived(t: np.ndarray, y: np.ndarray, p: Dict[str, Any]) -> Dict[str, np.nda
     EASI0 = float(p["EASI0"])
     EASI_red = (EASI0 - EASI) / EASI0
     EASI_red = np.clip(EASI_red, 0.0, float(p.get("EASI_red_cap", 1.0)))
-    EASI_pct_red = -EASI_red * 100.0
+    # Positive values represent improvement (reduction from baseline).
+    EASI_pct_red = EASI_red * 100.0
 
     return {
         "Central_ugml": Central_ugml,
