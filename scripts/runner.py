@@ -281,15 +281,18 @@ def run_one(
     Central_last = np.asarray(derived[pk_key], dtype=float)
     C_trough = float(Central_last[-1])
     C_avg = float(np.trapz(Central_last, t_last) / Iota_days)
-
+    C_max = float(np.max(Central_last)) 
+    
     summary: Dict[str, Any] = {
         "C_trough_ugml": C_trough,
         "C_avg_ugml": C_avg,
+        "C_max_ugml": C_max,
         "t_end_days": float(t_end),
         "dose_mgkg": float(dose_mgkg),
         "interval_weeks": int(interval_weeks),
         "n_doses": int(n_doses),
     }
+
 
     # Full timecourse (optional): compute SD PK metrics from full trajectory when available
     t_full = y_full = derived_full = None
