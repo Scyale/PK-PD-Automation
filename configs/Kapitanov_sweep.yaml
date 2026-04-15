@@ -35,6 +35,10 @@ params:
   MW: 146899.0
   body_weight_kg: 70.0
 
+outputs:
+  pk_key: Central_ugml
+  pd_key: RO3
+
 output:
   root_dir: results/Kapitanov_sweep
   format: h5

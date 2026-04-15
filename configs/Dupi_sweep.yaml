@@ -1,0 +1,45 @@
+# Dupi model config derived from EASI Model.txt
+model:
+  name: Dupi
+  module: models.Dupi
+
+params:
+  body_weight_kg: 70.0
+
+  # PK (from EASI Model.txt)
+  ka_day: 0.26
+  F: 0.63
+  Vc_ml: 2790.0
+  Vp_ml: 1656.0
+  Cl_ml_day: 117.0
+  Q_ml_day: 263.0
+  Vmax_ugml_day: 1.39
+  Km_ugml: 2.41
+
+  # PD
+  EASI0: 30.0
+  Imax: 0.8
+  IC50_ugml: 6.05
+  kout_day: 0.05
+  EASI_red_cap: 1.0
+
+simulation:
+  n_doses: 25
+  start_days: 0.0
+  dt_days: 0.25
+
+  solver:
+    method: RK45
+    rtol: 1.0e-6
+    atol: 1.0e-9
+
+outputs:
+  pk_key: Central_ugml
+  pd_key: EASI_red
+
+output:
+  root_dir: results/Dupi_sweep
+  folder_template: "{dose_mgkg}mgkg_q{interval_weeks}w"
+  write_run_h5: true
+  write_config_json: true
+  write_summary_json: true

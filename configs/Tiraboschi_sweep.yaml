@@ -24,12 +24,12 @@ params:
   Vp_ml: 2480.0           # ml
 
   Vmax_ug_day: 36.2      # ug/day
-  Km_ugml: 0.07           # ug/ml
+  Km_ugml: 0.078           # ug/ml
 
   # ---- PD ----
   EASI0: 27.5
   Imax: 0.97
-  IC50_ugml: 0.01         # ug/ml
+  IC50_ugml: 0.000016     # ug/ml
   kout: 0.0224            # 1/day
 
 outputs:
