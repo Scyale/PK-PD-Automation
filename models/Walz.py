@@ -140,14 +140,12 @@ def derived(t: np.ndarray, y: np.ndarray, p: Dict[str, Any]) -> Dict[str, np.nda
     Vc = float(p["Vc_ml"])
     Central = Cent / Vc  # ug/mL
 
-    # Recompute inhib here (can't reuse rhs() local variable)
     Imax = float(p["Imax"])
     IC50 = float(p["IC50_ugml"])
-    inhib = 1.0 - Imax * (Central / (IC50 + Central))  # same as rhs
+    inhib = 1.0 - Imax * (Central / (IC50 + Central))
 
-    # Your requested definition: TARC_red = 1 - inhib
-    # (Note: this is the same as "fractional inhibition" = Imax*C/(IC50+C))
-    TARC_red = 1.0 - inhib
+    TARC0 = float(p["TARC0"])
+    TARC_red = (TARC0 - TARC) / TARC0
 
     return {
         "Central_ugml": Central,
@@ -156,6 +154,5 @@ def derived(t: np.ndarray, y: np.ndarray, p: Dict[str, Any]) -> Dict[str, np.nda
         "Cent_ug": Cent,
         "Peri_ug": Peri,
         "TARC": TARC,
-        "inhib": inhib,  # optional debug output
+        "inhib": inhib,
     }
-
