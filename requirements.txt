@@ -7,6 +7,3 @@ h5py==3.9.*
 pytest==7.4.*
 jupyterlab==4.*
 ipykernel
-nbformat
-ipywidgets
-tqdm
