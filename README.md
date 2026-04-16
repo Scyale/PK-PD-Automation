@@ -28,62 +28,61 @@ Run a test simulation:
 ``` bash
 python scripts/runner.py --config configs/Dupi_sweep.yaml --dose_mgkg 5 --interval_weeks 4
 ```
-
-## Core idea
-
-The workflow separates:
-
-* **Models** → biology + ODEs (`models/<NAME>.py`)
-* **Configs** → parameters + solver (`configs/<NAME>.yaml`)
-* **Runner** → execution + storage (`scripts/runner.py`)
-
-Everything flows through the runner.
-
 ## Repository structure
 
 ```
 PK-PD-Automation/
-   ├ configs/     # YAML configs per model
+   ├ configs/     # YAML configuration files
    ├ models/      # PK/PD model implementations
    ├ scripts/     # runner.py (core engine)
-   ├ notebooks/   # Sweep, Timecourse, Helper workflows
-   └ results/     # auto-generated outputs
+   ├ notebooks/   # User interface
+   └ results/     # auto-generated output folders
 ```
+
+## Core idea
+
+The workflow uses these four units:
+
+* **Notebooks** → simulation + management of outputs (`notebooks/...ipynb`)
+* **Models** → biology + ODEs (`models/...py`)
+* **Configurations** → parameters + solver (`configs/...yaml`)
+* **Runner** → execution + storage (`scripts/runner.py`)
 
 ## Notebooks
 
-Each notebook contains markdown cells and documentation. This is just to provide an overview of the basic possibilities.
+Each notebook contains explicit markdown cells and documentation. This is just to provide an overview of the basic possibilities.
 
 ### Sweep.ipynb
 
-* Run dose × interval grids
 * Generate exposure-response plots
-* Compare regimens (q4w, q8w, etc.)
+* Run large dose × interval grids
+* Compare E-R of differnet regimens (q4w, q8w, etc.)
 
 ### Timecourse.ipynb
 
 * Simulate full PK/PD trajectories
-* Plot PK and optional PD over time
-* Supports steady-state and single-dose
-
+* Plot multiple doses 
+* Supports steady-state analysis (n=25)
+* As well as single-dose analysis (n=1)
+  
 ### Helper.ipynb
 
-* Inspect existing result folders
-* Track parameter sets
+* Manage result folder
+* Inspect existing results
 * Clean up outdated runs
 
 ## How it works
 
-### 1\. Model (`models/<Model>.py`)
+### 1. Models
 
-Defines: - ODE system (`rhs`) - dosing (`apply\_dose`) - derived outputs
+Define: ODE system (`rhs`), dosing function (`apply_dose`), derived outputs
 (PK/PD metrics)
 
-### 2\. Config (`configs/<Model>\_sweep.yaml`)
+### 2. Configurations
 
-Defines: - model module - parameters - solver settings - output keys
+Define: model module, parameters, solver settings, output keys
 
-### 3\. Runner (`scripts/runner.py`)
+### 3. Runner
 
 * loads config + model
 * builds parameter set
@@ -102,31 +101,28 @@ results/
       └─ 5mgkg_q4w_n25/
 ```
 
-Each run contains: - `run.h5` - `run_config.json` - `run_summary.json`
+Each run contains: `run.h5` - `run_config.json` - `run_summary.json`
 
 
 ## Add a new model
 
-1. Create `models/<NewModel>.py`
-2. Implement required API:
-
+1. Create `models/<NewModel>.py` containing:
    * DEFAULTS
    * validate_params
    * initial_conditions
    * apply_dose
    * rhs
    * derived
-3. Add config `configs/<NewModel>_sweep.yaml`
-4. Register in notebooks
-5. Run a test simulation
-
-## Notes
-
-* Results are cached by parameter hash
-* YAML controls PK/PD outputs
-* Timecourse and sweep outputs are separated
+2. Create `configs/<NewModel>_sweep.yaml` containing:
+   * params
+   * simulation & solver settings
+   * outputs
+3. Register in notebooks
+4. Run a test simulation
 
 ## Tip
 
-If something breaks, it's almost always: - wrong `pk\_key` / `pd\_key` -
-mismatch between model `derived()` and YAML - or stale cached results
+Most LLMs can reliably adapt existing files to the desired new settings.
+The easiest way is to simply download one of the existing `.py` and `.yaml` files.
+Submit these along with complete documentation of the variables and ODEs for the new model you wish to add.\
+**Check for hallucinations**
