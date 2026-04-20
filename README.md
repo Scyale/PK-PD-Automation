@@ -71,6 +71,12 @@ Each notebook contains explicit markdown cells and documentation. This is just t
 * Inspect existing results
 * Clean up outdated runs
 
+### Reference.ipynb
+
+* Assists integration of novel models
+* Check model notebbok compatibility
+* Help debugging 
+
 ## How it works
 
 ### 1. Models
@@ -106,6 +112,8 @@ Each run contains: `run.h5` - `run_config.json` - `run_summary.json`
 
 ## Add a new model
 
+The repo already contains 6 different models. But it is set up in a way that should allow the addition of any new models:
+
 1. Create `models/<NewModel>.py` containing:
    * DEFAULTS
    * validate_params
@@ -118,7 +126,7 @@ Each run contains: `run.h5` - `run_config.json` - `run_summary.json`
    * simulation & solver settings
    * outputs
 3. Register in notebooks
-4. Run a test simulation
+4. Run a test simulation in Reference.ipynb
 
 ## Tip
 
