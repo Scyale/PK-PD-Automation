@@ -1,0 +1,51 @@
+# Tezepelumab PK/PD FeNO model config adapted from:
+# Ly et al. (2021), J Clin Pharmacol 61(7):901-912.
+#
+# Notes:
+# - The clinical paper uses fixed SC doses (e.g. 210 mg Q4W).
+# - This workflow uses dose_mgkg. For a 70 kg subject:
+#     70 mg  ~= 1.0 mg/kg
+#     210 mg ~= 3.0 mg/kg
+#     280 mg ~= 4.0 mg/kg
+
+model:
+  name: Teze
+  module: models.Teze
+
+params:
+  body_weight_kg: 70.0
+
+  # PK typical values from population PK model (Table 3)
+  ka_day: 0.247
+  F: 0.645
+  Vc_ml: 4280.0
+  Vp_ml: 2290.0
+  Cl_ml_day: 201.0
+  Q_ml_day: 726.0
+
+  # PK-FeNO direct-response model (Table 4)
+  FeNO_base_ppb: 21.1
+  Emax_ratio: 0.722
+  EC50_ugml: 2.50
+  FeNO_red_cap: 1.0
+
+simulation:
+  n_doses: 25
+  start_days: 0.0
+  dt_days: 0.25
+
+  solver:
+    method: RK45
+    rtol: 1.0e-6
+    atol: 1.0e-9
+
+outputs:
+  pk_key: Central_ugml
+  pd_key: FeNO_red
+
+output:
+  root_dir: results/Teze_sweep
+  folder_template: "{dose_mgkg}mgkg_q{interval_weeks}w"
+  write_run_h5: true
+  write_config_json: true
+  write_summary_json: true
