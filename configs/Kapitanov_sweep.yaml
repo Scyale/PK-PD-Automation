@@ -1,6 +1,8 @@
+# Receptor Occupancy (RO) model config file to configurate simulations with RO.py
+# Read RO.py docstring for information on biology and model function
 model:
-  name: Kapitanov
-  module: models.Kapitanov
+  name: RO
+  module: models.RO
 
 simulation:
   n_doses: 25
@@ -40,7 +42,7 @@ outputs:
   pd_key: RO3
 
 output:
-  root_dir: results/Kapitanov_sweep
+  root_dir: results/RO_sweep
   format: h5
   folder_template: "{dose_mgkg}mgkg_q{interval_weeks}w"
   write_run_h5: true
