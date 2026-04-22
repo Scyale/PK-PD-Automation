@@ -1,8 +1,13 @@
 """
-Dupi.py — Dupilumab PK/PD implementation converted from "EASI Model.txt".
+EASI.py — Dupilumab PK/PD implementation to predict EASI change from baseline.
 
-PK: SC depot -> central/peripheral (2-comp), linear clearance (Cl) + TMDD-like MM elimination (Vmax/Km).
-PD: Mechanistic-like PD where EASI is a state with turnover:
+Based on Lebrikizumab model capturing drug effect.
+Calibrated with phase 3 data from Dupixent ClinPharm review.
+
+PK: Two-compartment model:
+     SC depot -> central/peripheral (2-comp) 
+     Linear clearance (Cl) + TMDD-like MM elimination (Vmax/Km).
+PD: Indirect response model:
      dEASI = kin*(1 - Imax*C/(IC50+C)) - kout*EASI
      EASI_red = (EASI0 - EASI)/EASI0
 
