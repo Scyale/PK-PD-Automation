@@ -1,16 +1,45 @@
 """
-Walz Dupilumab TMDD model (SC dosing + 2-compartment PK + indirect response PD).
+EASI.py — Dupilumab PK/PD implementation to predict EASI change from baseline.
 
-State vector:
-  y = [Dep, Cent, Peri, TARC]
-Units:
-  Dep, Cent, Peri: ug
-  Central: ug/mL  (Cent / Vc_ml)
-  TARC: dimensionless (baseline TARC0, typically 1)
-Derived:
-  Central_ugml, TARC_red = 1 - TARC
-Dosing:
-  At each dose time: Dep += F * Delta_ug
+Based on Lebrikizumab model capturing drug effect.
+Calibrated with phase 3 data from Dupixent ClinPharm review.
+
+PK: Two-compartment model:
+     SC depot -> central/peripheral (2-comp) 
+     Linear clearance (Cl) + TMDD-like MM elimination (Vmax/Km).
+PD: Indirect response model:
+     dEASI = kin*(1 - Imax*C/(IC50+C)) - kout*EASI
+     EASI_red = (EASI0 - EASI)/EASI0
+
+Conventions:
+- time: days
+- amounts: ug
+- volumes: mL
+- concentrations: ug/mL
+
+Runner API implemented:
+- DEFAULTS, validate_params, initial_conditions, apply_dose, rhs, derived
+
+TARC.py - Dupilumab PK/PD implementation to predict TARC change from baseline.
+
+TARC Gain rate inhibited proportionally to "Central" concentration to capturing drug effect.
+PD parameters were fitted to digitized SAD PKPD data from ClinPharm Review of Dupixent.
+Calibrated with phase 2 data  
+
+Structure:
+PK: Two-compartment model:
+     SC depot -> central/peripheral (2-comp) 
+     Linear clearance (Cl) + TMDD-like MM elimination (Vmax/Km).
+PD: Indirect response model:
+     dTARC = kin*(1 - Imax*C/(IC50+C)) - kout*TARC
+     TARC_red = (TARC0 - TARC) / TARC0
+
+Conventions:
+- time: days
+- amounts: ug
+- volumes: mL
+- concentrations: ug/mL
+
 """
 
 from __future__ import annotations
@@ -19,7 +48,7 @@ from typing import Dict, Any
 import numpy as np
 
 
-# Default parameters (set these to match your corrected Walz.txt values)
+# Default parameters
 DEFAULTS: Dict[str, Any] = {
     # Fixed workflow
     "body_weight_kg": 70.0,
@@ -62,7 +91,7 @@ def validate_params(p: Dict[str, Any]) -> None:
     ]
     missing = [k for k in required if k not in p]
     if missing:
-        raise ValueError(f"Missing Walz params: {missing}")
+        raise ValueError(f"Missing TARC params: {missing}")
 
     # Simple sanity checks
     if p["Vc_ml"] <= 0 or p["Vp_ml"] <= 0:
