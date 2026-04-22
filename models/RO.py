@@ -5,7 +5,7 @@
 - Incorporates TMDD via target turn-over
 
 PK: Three-compartment model:
-    Intravenous -> central (D1) 
+    Intravenous (bolus) -> central (D1) 
     Inter-compartmental transport into Peripheral & SoA compartment
     Linear clearance (kel) + TMDD elimination through kdeg.
     
@@ -56,8 +56,8 @@ DEFAULTS: Dict[str, float] = {
     "kdeg": 1.0 * 24.0,
 
     # Binding kinetics (kon intended units: 1/(nM*day))
-    "kon": 1e-3 * 86400.0,
-    "koff": 3.3e-5 * 86400.0,
+    "kon": 1e-3 * 86400.0,    # 1/(nM*day)
+    "koff": 3.3e-5 * 86400.0, # 1/day
 
     # Constants
     "MW": 146899.0,          # g/mol
