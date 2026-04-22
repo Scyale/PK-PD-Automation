@@ -30,7 +30,7 @@ simulation:
   dt_days: 0.25
 
   solver:
-    method: RK45
+    method: Radau
     rtol: 1.0e-6
     atol: 1.0e-9
 
