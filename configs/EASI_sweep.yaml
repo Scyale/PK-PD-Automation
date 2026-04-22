@@ -1,12 +1,13 @@
-# Dupi model config derived from EASI Model.txt
+# EASI model config file to configurate simulations with EASI.py
+# Read EASI.py docstring for information on biology and model function
 model:
-  name: Dupi
-  module: models.Dupi
+  name: EASI
+  module: models.EASI
 
 params:
   body_weight_kg: 70.0
 
-  # PK (from EASI Model.txt)
+  # PK
   ka_day: 0.26
   F: 0.63
   Vc_ml: 2790.0
@@ -38,7 +39,7 @@ outputs:
   pd_key: EASI_red
 
 output:
-  root_dir: results/Dupi_sweep
+  root_dir: results/EASI_sweep
   folder_template: "{dose_mgkg}mgkg_q{interval_weeks}w"
   write_run_h5: true
   write_config_json: true
