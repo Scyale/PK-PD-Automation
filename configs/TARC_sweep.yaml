@@ -1,6 +1,9 @@
+# TARC model config file to configurate simulations with TARC.py
+# Read TARC.py docstring for information on biology and model function
+
 model:
-  name: Walz
-  module: models.Walz
+  name: TARC
+  module: models.TARC
 
 simulation:
   n_doses: 25
@@ -11,8 +14,6 @@ simulation:
     rtol: 1e-6
     atol: 1e-9
 
-# Model params override DEFAULTS here if you want.
-# Keep values aligned with your corrected Walz.txt
 params:
   body_weight_kg: 70.0
   ka: 0.26
@@ -28,13 +29,13 @@ params:
   Imax: 0.8
   IC50_ugml: 6.05
 
-# This is the key to making the runner model-agnostic:
+
 outputs:
   pk_key: Central_ugml
   pd_key: TARC_red
 
 output:
-  root_dir: results/Walz_sweep
+  root_dir: results/TARC_sweep
   folder_template: "{dose_mgkg}mgkg_q{interval_weeks}w"
   write_run_h5: true
   write_config_json: true
