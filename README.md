@@ -26,7 +26,7 @@ pip install -r requirements.txt
 Run a test simulation:
 
 ``` bash
-python scripts/runner.py --config configs/Dupi_sweep.yaml --dose_mgkg 5 --interval_weeks 4
+python scripts/runner.py --config configs/EASI_sweep.yaml --dose_mgkg 5 --interval_weeks 4
 ```
 ## Repository structure
 
