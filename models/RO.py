@@ -1,23 +1,29 @@
-"""Kapitanov TMDD 3-compartment PK/PD model (Berkeley Madonna reconstruction).
+"""TMDD 3-compartment PK Receptor Occupancy model published 2025 by Kapitanov et al.  (https://doi.org/10.1002/psp4.70160)
+
+- Physiology inspired model
+- Predicts receptor occupancy at site of action (RO3)
+- Incorporates TMDD via target turn-over
+
+PK: Three-compartment model:
+    Intravenous -> central (D1) 
+    Inter-compartmental transport into Peripheral & SoA compartment
+    Linear clearance (kel) + TMDD elimination through kdeg.
+    
+PD: Receptor Occupancy:
+    Target engagement occurs in all compartments -> "kon" & "koff"
+    Target-turnover -> "ksyn" & "kdeg"
 
 Conventions:
 - Time: days
+- Volumes V1,V2,V3: L
 - Drug amounts D1,D2,D3: nmol
+- Conentration C1,C2,C3: nM
 - Free receptors R1,R2,R3: nM
 - Complex amounts DR1,DR2,DR3: nmol
-- Volumes V1,V2,V3: L
 
-Derived:
-- C1 = D1/V1 (nM)
-- Central_ugml = C1 * MW * 1e-6 (µg/mL), with MW in g/mol
-- RO3 = (DR3/V3) / (R3 + DR3/V3)
-
-Notes:
-- Loading-dose constructs in the original .mmd are intentionally not implemented.
-- n_doses is handled by the runner (fixed to 25).
 """
-from __future__ import annotations
 
+from __future__ import annotations
 from typing import Dict, Any, List
 import numpy as np
 
