@@ -29,7 +29,7 @@ DEFAULTS: Dict[str, Any] = {
     # subject
     "body_weight_kg": 70.0,
 
-    # PK (from EASI Model.txt)
+    # PK 
     "ka_day": 0.26,          # 1/day
     "F": 0.63,               # bioavailability
     "Vc_ml": 2790.0,         # central vol (mL)
@@ -39,7 +39,7 @@ DEFAULTS: Dict[str, Any] = {
     "Vmax_ugml_day": 1.39,   # nonlinear Vmax (ug/mL/day)
     "Km_ugml": 2.41,         # nonlinear Km (ug/mL)
 
-    # PD (from EASI Model.txt)
+    # PD 
     "EASI0": 30.0,           # baseline EASI
     "Imax": 0.8,             # maximal inhibitory effect (fraction)
     "IC50_ugml": 6.05,       # ug/mL
@@ -54,7 +54,7 @@ def validate_params(p: Dict[str, Any]) -> None:
            "EASI0","Imax","IC50_ugml","kout_day","EASI_red_cap","body_weight_kg"]
     missing = [k for k in req if k not in p]
     if missing:
-        raise KeyError(f"Dupi: missing params {missing}")
+        raise KeyError(f"EASI model: missing params {missing}")
     if float(p["Vc_ml"])<=0 or float(p["Vp_ml"])<=0:
         raise ValueError("Volumes must be > 0")
     for k in ["ka_day","Q_ml_day","Cl_ml_day","kout_day","IC50_ugml","Km_ugml"]:
@@ -102,7 +102,7 @@ def rhs(t: float, y: np.ndarray, p: Dict[str, Any]) -> np.ndarray:
     dDep = -ka * Dep
 
     # linear elimination (Cl in mL/day -> amount/day = Cent/Vc * Cl)
-    elim_lin = (Cl / Vc) * Cent  # ug/day equivalently ke*Cent if ke=Cl/Vc
+    elim_lin = (Cl / Vc) * Cent  # ug/day 
 
     # nonlinear (MM) elimination (amount-based)
     denom = (Km + C)
