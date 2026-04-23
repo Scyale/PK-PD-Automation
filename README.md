@@ -106,13 +106,15 @@ results/
    └─ params_<hash>/
       └─ 5mgkg_q4w_n25/
 ```
-
-Each run contains: `run.h5` - `run_config.json` - `run_summary.json`
+Results folders are generated automatically.
+To make sure results fron different parameter-sets don't get mixed up, the runner calculates a hash for every parameter constellation
+All runs with the same parameter set are saved in the same params_<hash> folder. 
+Each run contains: `run.h5`, `run_config.json`, `run_summary.json`. These are called by the notebook for plotting.
 
 
 ## Add a new model
 
-The repo already contains 6 different models. But it is set up in a way that should allow the addition of any new models:
+The repo already contains 3 different Dupilumab models. But it is set up in a way that should allow the addition of any new model:
 
 1. Create `models/<NewModel>.py` containing:
    * DEFAULTS
