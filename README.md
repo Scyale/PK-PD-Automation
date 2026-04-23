@@ -7,6 +7,9 @@ A lightweight Python workflow to run repeated-dose PK/PD ODE models,
 perform dose/interval sweeps, and visualize exposure-response or full
 timecourses.
 
+This workflow was created as part of a Windward Bio project.
+https://windwardbio.com/
+
 ## Quick start (2 minutes)
 
 ``` bash
